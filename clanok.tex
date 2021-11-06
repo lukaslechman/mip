@@ -9,119 +9,93 @@
 \usepackage{graphicx}
 \usepackage{url} % príkaz \url na formátovanie URL
 \usepackage{hyperref} % odkazy v texte budú aktívne (pri niektorých triedach dokumentov spôsobuje posun textu)
-\usepackage{pdfpages}
+
 \usepackage{cite}
 %\usepackage{times}
 
 \pagestyle{headings}
 
-\title{Názov\thanks{Semestrálny projekt v predmete Metódy inžinierskej práce, ak. rok 2015/16, vedenie: Meno Priezvisko}} % meno a priezvisko vyučujúceho na cvičeniach
+\title{Rozpoznávanie reči s využitím HMM\thanks{Semestrálny projekt v predmete Metódy inžinierskej práce, ak. rok 2021/22, vedenie: Ján Lučanský}} 
 
 \author{Lukáš Lechman\\[2pt]
 	{\small Slovenská technická univerzita v Bratislave}\\
 	{\small Fakulta informatiky a informačných technológií}\\
-	{\small \texttt{...@stuba.sk}}
+	{\small \texttt{xlechman@stuba.sk}}
 	}
 
-\date{\small 30. september 2015} % upravte
+\date{\small 30. september 2021} 
 
 
 
 \begin{document}
 
-\maketitle {14.10.2021}
+\maketitle
 
 \begin{abstract}
-\ldots
+V tejto práci by som sa chcel zamerať na modely rozpoznávania reči. Primárne sa budem venovať automatickému rozpoznávaniu reči (ASR). Využitiu Markovho skrytého modelu a jeho implementáciu v ASR. Ďalej sa pokúsim priblížiť, využitie a aplikáciu rozpoznávania reči v bežnom živote. Ako vieme využiť umelú neurónovú sieť, aby počítač komunikoval viac ako človek. A s tým súvisí v neposlednom rade využitie ASR inteligentnými virtuálnymi asistentmi.
 \end{abstract}
 
 
 
 \section{Úvod}
-tento článok sa bude primárne zameriavať priblížením problematiky modelov rozpoznávania reči.
 
+Od dôb turingovho stroja sme ušli dlhú cestu. Počítače a vo všeobecnosti akékoľvek elektronické zariadenia, sa stali kompaktnejšími a kompatibilnejšími. Aj napriek ich väčšej komplexnosti sú jednoduchšie na ovládanie než tomu bolo v minulosti, k ich ovládaniu už nie je potrebný siahodlhý návod ani viacero ľudí. V dnešnej dobe sa už ani nedá nájsť človek ktorý by nevedel pracovať s nejakou elektronikou, alebo by sa to aspoň nevedel naučiť. No ako ľudia máme tendenciu si stále zjednodušovať už aj tak dosť jednoduché veci. Dalo by sa povedať, že to je našou hlavnou evolučnou črtou. A nie je tomu inak ani vo svete počítačov. Jeden taký spôsob, ako si zjednodušiť prácu s elektronikou je využitie rozpoznávania reči, tzv. automatic speech recognition. 
 
-Motivujte čitateľa a vysvetlite, o čom píšete. Úvod sa väčšinou nedelí na časti.
+Práve rozpoznávanie reči sa stálo populárnym v poslednom desaťročí a stále sa tlačí viac do popredia v oblasti vývoja v IT svete. No nie vždy tomu bolo tak. V minulom storočí, keď išlo len o koncept budúcností sa na to mnoho ľudí pozeralo ako zbytočný krok, keďže mali za to, že komunikácia medzi človekom a počítačom bude vždy nadradená. Veď človek je inteligentnejší ako počítač, sám ho skonštruoval, tak ako by mohol počítač vedieť viac ako on. No dnes už vieme,  že počítače sa dokážu učiť, využívať umelú inteligenciu a rôzne algoritmy aby sa mohli v mnohých ohľadoch priblížiť človeku. Síce sme sa ešte nedostali do bodu kedy by boli inteligentnejšími ako my, no už to nie je taká nereálna predstava ako v minulosti. Práve ASR by tomu mohlo dopomôcť. 
+Rozpoznávanie reči má čoraz väčšie využitie, od zjednodušeného vyhľadávania na internete a vykonania jednoduchých pokynov až po uľahčenie práce invalidným ľuďom, či dokonca pri práci v armáde. Asi každý z nás sa s ním niekde stretol, no nikdy sme sa nezamýšľali nad tým, ako je možné, že zariadenie vedelo porozumieť našim požiadavkám a následne ich vykonať.
 
-Uveďte explicitne štruktúru článku. Tu je nejaký príklad.
-Základný problém, ktorý bol naznačený v úvode, je podrobnejšie vysvetlený v časti~\ref{nejaka}.
-Dôležité súvislosti sú uvedené v častiach~\ref{dolezita} a~\ref{dolezitejsia}.
-Záverečné poznámky prináša časť~\ref{zaver}.
-
-
-
-\section{Nejaká časť} \label{nejaka}
-\includepdf[page={1}]{asr} 
-
-Z obr.~\ref{f:rozhod} je všetko jasné. 
-
-\begin{figure*}[tbh]
-\centering
-%\includegraphics[scale=1.0]{diagram.pdf}
-Aj text môže byť prezentovaný ako obrázok. Stane sa z neho označný plávajúci objekt. Po vytvorení diagramu zrušte znak \texttt{\%} pred príkazom \verb|\includegraphics| označte tento riadok ako komentár (tiež pomocou znaku \texttt{\%}).
-\caption{Rozhodujúci argument.}
-\label{f:rozhod}
-\end{figure*}
+V jednoduchosti by sa dalo povedať, že softvér na rozpoznanie reči funguje na jednoduchom princípe. Po detekcií reči, sa pomocou rôznych zariadení vytvorí súbor s tým čo bolo povedané vo forme vlnových dĺžok. Tento súbor následne prejde rôznymi úpravami, ako je odstránenie hluku v pozadí a pod.. Vyčistený súbor je rozbitý na menšie celky, ktoré sa analyzujú a prechádzajú ASR softvérom, ktorý na základe rôznych algoritmov a modelov predpokladá, aké slovo bolo povedané. No ako to tak už býva nič nie je tak jednoduché ako sa na prvý pohľad môže zdať. Za týmto zdanlivo jednoduchým postupom sa skrýva množstvo komplexných algoritmov a modelov, ktoré musia fungovať s obrovskou presnosťou, aby sme dosiahli požadovaný výsledok. Medzi takéto modely patria Skryté Markove modely (Hidden Markov Models).
 
 
 
-\section{Iná časť} \label{ina}
+\section{Hidden Markov models}\label{hiden}
+Pod týmto pojmom rozumieme model pravdepodobnosti pozostávajúci zo série premenných, ktoré reprezentujú isté pozorovania, premenné ktoré sú pre pozorovateľa skryté, z rozloženia počiatočného stavu, prechodovej matice a taktiež z rozloženia parametrov pre všetky pozorovania. \cite{7066641}
+Skryté Markove modely pracujú s tzv. štatistickým modelovaním pri spracovaní signálu. Dalo by sa povedať, že skryté markovove modely sa dajú reprezentovať ako štatistické stavové automaty. 
+Tie sú tvorené uzlami a prechodmi medzi nimi, pričom vnútorné vzťahy medzi uzlami sú reprezentované maticou pravdepodobnosti prechodov. Táto matica určuje pravdepodobnosť prechodu z jedného uzla do iného.  \cite{bardovnova2000rozpoznavani}
+Prechody medzi stavmi sa riadia súborom pravdepodobností nazývaných pravdepodobnosti prechodu. V konkrétnom stave sa môže generovať výsledok alebo pozorovanie podľa príslušného rozdelenia pravdepodobnosti. Pre vonkajšieho pozorovateľa je viditeľný len výsledok, nie stav, a preto sú stavy pre vonkajšieho pozorovateľa skryté, odtiaľ pochádza názov HMM. \cite{6031408}
 
-Základným problémom je teda\ldots{} Najprv sa pozrieme na nejaké vysvetlenie (časť~\ref{ina:nejake}), a potom na ešte nejaké (časť~\ref{ina:nejake}).\footnote{Niekedy môžete potrebovať aj poznámku pod čiarou.}
-
-Môže sa zdať, že problém vlastne nejestvuje\cite{Coplien:MPD}, ale bolo dokázané, že to tak nie je~\cite{Czarnecki:Staged, Czarnecki:Progress}. Napriek tomu, aj dnes na webe narazíme na všelijaké pochybné názory\cite{PLP-Framework}. Dôležité veci možno \emph{zdôrazniť kurzívou}.
-
-
-\subsection{Nejaké vysvetlenie} \label{ina:nejake}
-
-Niekedy treba uviesť zoznam:
-
+Pre správne definovanie HMM potrebujeme niekoľko prvkov:
 \begin{itemize}
-\item jedna vec
-\item druhá vec
-	\begin{itemize}
-	\item x
-	\item y
-	\end{itemize}
-\end{itemize}
 
-Ten istý zoznam, len číslovaný:
+\item	Počet stavov modelu N
 
-\begin{enumerate}
-\item jedna vec
-\item druhá vec
-	\begin{enumerate}
-	\item x
-	\item y
-	\end{enumerate}
-\end{enumerate}
+\item Počet pozorovaných symbolov M
 
+\item Množina pravdepodobností prechodu medzi stavmi $A={aij}$.
 
-\subsection{Ešte nejaké vysvetlenie} \label{ina:este}
+$a_{ij}=p\{q_{t+1}=j\backslash{\rm q}_{t}=i\}, 1\leq i, j\leq N,{\hbox{(1)}} $
 
-\paragraph{Veľmi dôležitá poznámka.}
-Niekedy je potrebné nadpisom označiť odsek. Text pokračuje hneď za nadpisom.
+kde qt predstavuje aktuálny stav.
 
+\item Rozdelenie pravdepodobnosti v každom stave $B=bj(k)$
 
+${b_{j}(k)=p\{o_{t}=v_{k}\backslash {\rm q}_{{\rm t}}={\rm j}\},1\leq j\leq N, 1\leq {\rm k}\leq {\rm M} \hbox{(2)}} $
 
-\section{Dôležitá časť} \label{dolezita}
+kde vk označuje k-tý symbol pozorovania a Ot aktuálny vektor parametrov.
+
+\item Rozdelenie počiatočného stavu $\pi={pi_{i}}$
+
+ $\pi_{i}=p\{q_{1}=i\},\quad 1\leq i\leq N{\hbox{(3)}} $
+
+\item Následne môžeme použiť zápis $\lambda=(A,B,\pi)$
+\cite{6031408}
+ \end{itemize}
 
 
 
+\section{HMM v ASR} \label{hmm v asr}
 
-\section{Ešte dôležitejšia časť} \label{dolezitejsia}
-
-
-
-
-\section{Záver} \label{zaver} % prípadne iný variant názvu
+HMM majú široké uplatnenie najmä kvôli svoje schopnosti rozpoznať súvislú reč ako tak aj samostatné slová. A taktiež preto, že ich vieme trénovať.
+Pri rozpoznávaní reči HMM určuje pravdepodobnosť následností 2 foném. Tento proces prebieha v 3 fázach. Prvá kontroluje pravdepodobnosť či daná fonéma je v skutočnosti fonéma, ktorá bola vyslovená, keďže každý človek dokáže povedať jedno slovo rôznymi spôsobmi, a teda sa aj jednotlivé fonémy môžu čiastočne líšiť. Ide o dôsledok prirodzene stochastickej povahy reči. Variabilita vo výslovnosti slova alebo fonémy sa prejavuje dvoma spôsobmi: trvaním a spektrálnym obsahom, ktoré sú známe aj ako akustické pozorovania. Okrem toho sú spektrálne obsahy konkrétnej fonémy ovplyvnené výskytom foném v okolitom kontexte, čo je jav nazývaný koartikulačný efekt. Je preto potrebné, aby HMM zohľadnil tieto koartikulácie. \cite{Chowdhary2020} V druhej fáze HMM kontroluje, či sa susedné fonémy môžu vyskytovať vedľa seba. Na základe týchto pravdepodobností HMM určí slovo, ktoré bolo s najväčšou pravdepodobnosťou vyslovené. V tretej fáze HMM kontroluje či slová, ktoré vznikli v druhej fáze dávajú zmysel a teda môžu tvoriť slovné spojenie. Vždy keď HMM narazí na slovo alebo frázu, ktorá nedáva zmysel tak sa vráti do druhej fázy a určí slovo s najväčšou pravdepodobnosťou, tak aby fráza dávala zmysel.
 
 
 
-%\acknowledgement{Ak niekomu chcete poďakovať\ldots}
+\section {Proces učenia HMM}
 
 
-% týmto sa generuje zoznam literatúry z obsahu súboru literatura.bib podľa toho, na čo sa v článku odkazujete
+\section{Záver} \label{zaver} 
+
+
 \bibliography{literatura}
 \bibliographystyle{plain} % prípadne alpha, abbrv alebo hociktorý iný
 \end{document}
